@@ -11,10 +11,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    // Make the built apk include libs - begin
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
         jni.srcDirs = [] //disable automatic ndk-build call
     }
+    // Make the built apk include libs - end
     buildTypes {
         release {
             minifyEnabled false
