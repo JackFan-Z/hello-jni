@@ -17,6 +17,22 @@ android {
         jni.srcDirs = [] //disable automatic ndk-build call
     }
     // Make the built apk include libs - end
+
+    // Let gradle run ndk-build
+    task taskNdkBuild(type: Exec, description: 'Compile JNI source via NDK') {
+        workingDir file('src/main')
+        commandLine getNdkBuild()
+        //commandLine ndkBuild, 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+    }
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn taskNdkBuild
+    }
+    task ndkBuildClean(type: Exec) {
+        workingDir file('src/main')
+        commandLine getNdkBuild(), 'clean'
+    }
+    clean.dependsOn 'ndkBuildClean'
+
     buildTypes {
         release {
             minifyEnabled false
@@ -32,4 +48,35 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
+def getNdkBuild() {
+    def ndkDir
+    def lpfile = file('../local.properties');
+    if (lpfile.exists()) {
+        def Properties localProps = new Properties()
+        localProps.load(new FileInputStream(lpfile))
+        if (localProps['ndk.dir'] != null) {
+            ndkDir = localProps['ndk.dir']
+        }
+    } else logger.info('local.properties does not exist')
+
+    if (ndkDir == null) {
+        if (System.env.ANDROID_NDK_HOME != null) {
+            ndkDir = System.env.ANDROID_NDK_HOME
+        } else if (System.env.ANDROID_NDK_PATH != null) {
+            ndkDir = System.env.ANDROID_NDK_PATH
+        }
+    }
+
+    if (ndkDir == null) {
+        logger.error('ndk.dir is not set in local.properties')
+        //commandLine 'echo Please see error msg above'
+    }
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        return "$ndkDir\\ndk-build.cmd"
+    } else {
+        return "$ndkDir/ndk-build"
+    }
 }
