@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public native String stringFromJNI();
-    public native int runTest(int parameter1, int parameter2, String paraString);
+    public static native int runTest(int parameter1, int parameter2, String paraString);
 
     static {
         System.loadLibrary("hello-jni");

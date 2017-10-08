@@ -23,4 +23,11 @@ public class ExampleInstrumentedTest {
 
         assertEquals("com.example.jackfan.hellojniold", appContext.getPackageName());
     }
+
+    @Test
+    public void runTest1() throws Exception {
+        int testResult = MainActivity.runTest(3, 10, "To test...");
+
+        assertEquals(-10, testResult);
+    }
 }
